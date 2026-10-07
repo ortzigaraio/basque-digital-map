@@ -158,8 +158,9 @@
         "text-size": 10, "text-max-width": 8 },
       "paint": { "text-color": "#7f8694", "text-halo-color": "#1a1d23", "text-halo-width": 1.2 } },
     { "id": "cumbres", "type": "symbol", "source": "osm", "source-layer": "mountain_peak", "minzoom": 11,
+      "filter": ["has", "name"],
       "metadata": { "etiqueta": true },
-      "layout": { "text-field": ["concat", "▲ ", ["coalesce", ["get", "name"], ""], "\n", ["to-string", ["get", "ele"]], " m"],
+      "layout": { "text-field": ["case", ["has", "ele"], ["concat", "▲ ", ["get", "name"], "\n", ["to-string", ["get", "ele"]], " m"], ["concat", "▲ ", ["get", "name"]]],
         "text-font": ["Noto Sans Regular"], "text-size": 10 },
       "paint": { "text-color": "#8a8f7d", "text-halo-color": "#1a1d23", "text-halo-width": 1.2 } },
 
