@@ -3,7 +3,7 @@
 Mapa digital de Euskadi, oscuro y elegante, con **todas las calles** (OpenStreetMap) y el exterior oscurecido: la tierra que no es Euskadi queda en sombra, el mar no.
 Incluye los **GeoJSON** de Euskadi, sus tres territorios y sus municipios, listos para usar en cualquier proyecto.
 
-**➜ Mapa en vivo:** https://ortzigaraio.github.io/Euskadi-Mapa-digital-/
+**➜ Mapa en vivo:** https://mapa.ortzigar.org
 
 ![Euskadi](img/euskadi.png)
 
@@ -107,7 +107,7 @@ El visor limita el desplazamiento a la zona que cubre la máscara.
 Euskadiko mapa digitala, ilun eta dotorea, **kale guztiekin** (OpenStreetMap). Euskadi ez den lurra ilunduta dago; itsasoa ez.
 Euskadiren, hiru lurraldeen eta udalerri guztien **GeoJSON** fitxategiak daude `data/` karpetan, edozein proiektutan erabiltzeko.
 
-- Mapa zuzenean: https://ortzigaraio.github.io/Euskadi-Mapa-digital-/
+
 - `data/euskadi.geojson` – Euskadiko muga
 - `data/provincias.geojson` – Araba, Bizkaia eta Gipuzkoa
 - `data/municipios.geojson` – udalerriak (INE kodea, biztanleak, izena euskaraz eta gaztelaniaz) eta partzuergoak
