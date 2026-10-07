@@ -87,3 +87,6 @@ select { width: 100%; background: rgba(255, 255, 255, 0.04); color: var(--text);
 select:focus { border-color: var(--accent); }
 select option { background: #16181d; color: var(--text); }
 .info { color: var(--muted); font-size: 12px; align-self: center; }
+.calles { padding: 10px 0 2px; margin: 10px 0 0; border-top: 1px solid var(--line); }
+.calles-opciones { display: flex; flex-direction: column; gap: 8px; width: 100%; }
+.calles-opciones[hidden] { display: none; }

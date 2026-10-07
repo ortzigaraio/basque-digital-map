@@ -169,6 +169,18 @@
     <input id="buscar" type="search" list="lista-municipios" autocomplete="off" data-i18n-ph="buscar">
     <datalist id="lista-municipios"></datalist>
 
+    <div class="row calles">
+      <span class="label" data-i18n="kaleak"></span>
+      <select id="calles-ciudad"><option value="" data-i18n="ninguno"></option></select>
+      <div class="calles-opciones" id="calles-opciones" hidden>
+        <div class="seg" id="calles-modo">
+          <button data-modo="tipo" data-i18n="m_tipo"></button><button data-modo="arcoiris" data-i18n="m_arco"></button><button data-modo="uno" data-i18n="m_uno"></button>
+        </div>
+        <label class="chk"><input type="checkbox" id="calles-base"> <span data-i18n="ocultar_base"></span></label>
+        <div class="links"><a id="calles-descarga" download>⇩ GeoJSON</a><span id="calles-info" class="info"></span></div>
+      </div>
+    </div>
+
     <details id="opciones" open>
       <summary data-i18n="opciones"></summary>
 
@@ -213,16 +225,6 @@
           <button id="restablecer" data-i18n="restablecer"></button>
           <button id="exportar" data-i18n="exportar"></button>
         </div>
-      </div>
-
-      <div class="row">
-        <span class="label" data-i18n="kaleak"></span>
-        <select id="calles-ciudad"><option value="" data-i18n="ninguno"></option></select>
-        <div class="seg" id="calles-modo">
-          <button data-modo="tipo" data-i18n="m_tipo"></button><button data-modo="arcoiris" data-i18n="m_arco"></button><button data-modo="uno" data-i18n="m_uno"></button>
-        </div>
-        <label class="chk"><input type="checkbox" id="calles-base"> <span data-i18n="ocultar_base"></span></label>
-        <div class="links" id="calles-links" hidden><a id="calles-descarga" download>⇩ GeoJSON</a><span id="calles-info" class="info"></span></div>
       </div>
 
       <div class="row">
@@ -433,6 +435,7 @@
         }
       }
       const buscar = panel.querySelector("#buscar");
+      let cargarCallesDe = null;
       const irA = () => {
         const f = indice.get(buscar.value.trim().toLowerCase());
         if (!f) return;
@@ -442,6 +445,7 @@
         map.fitBounds(b, { padding: 60, duration: 1600, pitch: map.getPitch(), bearing: map.getBearing() });
         map.setFilter("municipio-resaltado", ["==", ["get", "osm_id"], f.properties.osm_id]);
         buscar.blur();
+        if (cargarCallesDe) cargarCallesDe(f.properties.osm_id);
       };
       buscar.addEventListener("change", irA);
       buscar.addEventListener("keydown", (ev) => { if (ev.key === "Enter") irA(); });
@@ -477,15 +481,22 @@
       const CAPAS_BASE = ["tunel", "senderos", "servicio", "calles", "carreteras-secundarias", "carreteras-principales", "autopistas", "ferrocarril", "ferrocarril-traviesas"];
 
       const sel = panel.querySelector("#calles-ciudad");
-      const ciudades = await (await fetch("data/calles/index.json")).json().catch(() => []);
+      const ciudades = await fetch("data/calles/index.json", { cache: "no-cache" }).then((r) => r.json()).catch(() => []);
+      const grupos = {};
       for (const c of ciudades) {
+        const prov = c.provincia || "—";
+        if (!grupos[prov]) {
+          grupos[prov] = document.createElement("optgroup");
+          grupos[prov].label = prov;
+        }
         const o = document.createElement("option");
         o.value = c.archivo;
-        o.textContent = `${c.nombre} · ${(c.kb / 1024).toFixed(1)} MB`;
-        sel.appendChild(o);
+        o.textContent = `${c.nombre} · ${c.kb >= 1024 ? (c.kb / 1024).toFixed(1) + " MB" : c.kb + " KB"}`;
+        grupos[prov].appendChild(o);
       }
+      for (const prov of Object.keys(grupos).sort()) sel.appendChild(grupos[prov]);
       const cargarCalles = async (archivo) => {
-        const links = panel.querySelector("#calles-links");
+        const links = panel.querySelector("#calles-opciones");
         if (!archivo) {
           map.getSource("calles-geojson").setData({ type: "FeatureCollection", features: [] });
           links.hidden = true;
@@ -503,6 +514,10 @@
         map.fitBounds([[cw, cs], [ce, cn]], { padding: 40, duration: 1400, pitch: map.getPitch(), bearing: map.getBearing() });
       };
       sel.addEventListener("change", () => cargarCalles(sel.value));
+      cargarCallesDe = (osm) => {
+        const c = ciudades.find((x) => x.osm_id === osm);
+        if (c && sel.value !== c.archivo) { sel.value = c.archivo; cargarCalles(c.archivo); }
+      };
       const ponerModo = (m) => {
         map._modoCalles = m;
         map.setPaintProperty("calles-geojson", "line-color", colorCalles(m, tema));
