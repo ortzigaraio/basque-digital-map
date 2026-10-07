@@ -8,21 +8,24 @@
           idioma: "Izenen hizkuntza", capas: "Geruzak", c_mascara: "Kanpoaldea ilundu", c_prov: "Lurraldeak",
           c_muni: "Udalerriak", c_edif: "Eraikinak", c_relieve: "Erliebea", colores: "Koloreak", temas: "Gaiak",
           mascara: "Maskara", opacidad: "Opakutasuna", exagerar: "Erliebe-eskala", sombras: "Itzalak",
-          restablecer: "Berrezarri", exportar: "Estiloa jaitsi", pob: "biztanle", prov: "Lurraldea",
+          restablecer: "Berrezarri", exportar: "Estiloa jaitsi", kaleak: "Kaleak GeoJSON", ninguno: "— Udalerria aukeratu —",
+          m_tipo: "Mota", m_arco: "Ortzadarra", m_uno: "Kolore bat", vias: "bide", ocultar_base: "Oinarri-mapako kaleak ezkutatu", pob: "biztanle", prov: "Lurraldea",
           col: { fondo: "Lurra", agua: "Ura", calles: "Kaleak", autopistas: "Autobideak", edificios: "Eraikinak",
                  texto: "Testua", mascara: "Maskara", borde: "Muga" } },
     es: { sub2d: "Mapa digital · 2D", sub3d: "Mapa digital · 3D", buscar: "Buscar municipio…", opciones: "Opciones",
           idioma: "Idioma de los nombres", capas: "Capas", c_mascara: "Oscurecer el exterior", c_prov: "Provincias",
           c_muni: "Municipios", c_edif: "Edificios", c_relieve: "Relieve", colores: "Colores", temas: "Temas",
           mascara: "Máscara", opacidad: "Opacidad", exagerar: "Escala del relieve", sombras: "Sombreado",
-          restablecer: "Restablecer", exportar: "Descargar estilo", pob: "habitantes", prov: "Provincia",
+          restablecer: "Restablecer", exportar: "Descargar estilo", kaleak: "Calles en GeoJSON", ninguno: "— Elegir municipio —",
+          m_tipo: "Tipo", m_arco: "Arcoíris", m_uno: "Un color", vias: "vías", ocultar_base: "Ocultar calles del mapa base", pob: "habitantes", prov: "Provincia",
           col: { fondo: "Tierra", agua: "Agua", calles: "Calles", autopistas: "Autopistas", edificios: "Edificios",
                  texto: "Texto", mascara: "Máscara", borde: "Borde" } },
     en: { sub2d: "Digital map · 2D", sub3d: "Digital map · 3D", buscar: "Search municipality…", opciones: "Options",
           idioma: "Label language", capas: "Layers", c_mascara: "Darken outside", c_prov: "Provinces",
           c_muni: "Municipalities", c_edif: "Buildings", c_relieve: "Terrain", colores: "Colours", temas: "Themes",
           mascara: "Mask", opacidad: "Opacity", exagerar: "Terrain scale", sombras: "Hillshade",
-          restablecer: "Reset", exportar: "Download style", pob: "inhabitants", prov: "Province",
+          restablecer: "Reset", exportar: "Download style", kaleak: "Streets as GeoJSON", ninguno: "— Choose a municipality —",
+          m_tipo: "Type", m_arco: "Rainbow", m_uno: "Single", vias: "ways", ocultar_base: "Hide base map streets", pob: "inhabitants", prov: "Province",
           col: { fondo: "Land", agua: "Water", calles: "Streets", autopistas: "Motorways", edificios: "Buildings",
                  texto: "Text", mascara: "Mask", borde: "Border" } },
   };
@@ -56,6 +59,28 @@
 
   function pintar(map, id, prop, valor) {
     if (map.getLayer(id)) map.setPaintProperty(id, prop, valor);
+  }
+
+  // Colores de la capa de calles GeoJSON
+  const TIPOS_VIA = {
+    grandes: ["motorway", "motorway_link", "trunk", "trunk_link"],
+    principales: ["primary", "primary_link", "secondary", "secondary_link"],
+    calles: ["tertiary", "tertiary_link", "residential", "unclassified", "living_street", "road"],
+    peatonales: ["pedestrian", "footway", "steps", "path", "cycleway", "bridleway", "corridor"],
+    servicio: ["service", "track"],
+  };
+  function colorCalles(modo, t) {
+    if (modo === "uno") return t.borde;
+    if (modo === "arcoiris") {
+      return ["to-color", ["concat", "hsl(", ["%", ["*", ["get", "id"], 137], 360], ", 85%, 62%)"]];
+    }
+    return ["match", ["get", "highway"],
+      TIPOS_VIA.grandes, t.autopistas,
+      TIPOS_VIA.principales, t.borde,
+      TIPOS_VIA.calles, "#7fb3ff",
+      TIPOS_VIA.peatonales, "#5fd39a",
+      TIPOS_VIA.servicio, "#b48cff",
+      "#9aa0aa"];
   }
 
   function aplicarTema(map, t, modo) {
@@ -95,6 +120,7 @@
     pintar(map, "euskadi-halo", "line-color", borde);
     pintar(map, "euskadi-borde", "line-color", borde);
     pintar(map, "municipio-resaltado", "line-color", borde);
+    if (map.getLayer("calles-geojson")) map.setPaintProperty("calles-geojson", "line-color", colorCalles(map._modoCalles || "tipo", t));
 
     const textos = {
       "nombres-agua": [mezcla(agua, texto, 0.45), agua], "nombres-rios": [mezcla(agua, texto, 0.45), agua],
@@ -187,6 +213,16 @@
           <button id="restablecer" data-i18n="restablecer"></button>
           <button id="exportar" data-i18n="exportar"></button>
         </div>
+      </div>
+
+      <div class="row">
+        <span class="label" data-i18n="kaleak"></span>
+        <select id="calles-ciudad"><option value="" data-i18n="ninguno"></option></select>
+        <div class="seg" id="calles-modo">
+          <button data-modo="tipo" data-i18n="m_tipo"></button><button data-modo="arcoiris" data-i18n="m_arco"></button><button data-modo="uno" data-i18n="m_uno"></button>
+        </div>
+        <label class="chk"><input type="checkbox" id="calles-base"> <span data-i18n="ocultar_base"></span></label>
+        <div class="links" id="calles-links" hidden><a id="calles-descarga" download>⇩ GeoJSON</a><span id="calles-info" class="info"></span></div>
       </div>
 
       <div class="row">
@@ -412,6 +448,7 @@
 
       map.on("click", "municipios-clic", (ev) => {
         if (map.getZoom() >= 15) return;
+        if (map.getLayer("calles-geojson") && map.queryRenderedFeatures(ev.point, { layers: ["calles-geojson"] }).length) return;
         const p = ev.features[0].properties;
         map.setFilter("municipio-resaltado", ["==", ["get", "osm_id"], p.osm_id]);
         const t = TXT[UI_LANG[lang]];
@@ -424,6 +461,76 @@
       });
       map.on("mouseenter", "municipios-clic", () => { if (map.getZoom() < 15) map.getCanvas().style.cursor = "pointer"; });
       map.on("mouseleave", "municipios-clic", () => { map.getCanvas().style.cursor = ""; });
+
+      // Calles en GeoJSON por municipio (data/calles/)
+      map.addSource("calles-geojson", { type: "geojson", data: { type: "FeatureCollection", features: [] } });
+      map.addLayer({ id: "calles-geojson", type: "line", source: "calles-geojson",
+        layout: { "line-cap": "round", "line-join": "round" },
+        paint: {
+          "line-color": colorCalles(map._modoCalles, tema),
+          "line-width": ["interpolate", ["exponential", 1.5], ["zoom"],
+            10, ["match", ["get", "highway"], TIPOS_VIA.grandes, 1.2, TIPOS_VIA.principales, 0.9, 0.45],
+            14, ["match", ["get", "highway"], TIPOS_VIA.grandes, 3, TIPOS_VIA.principales, 2.2, 1.2],
+            18, ["match", ["get", "highway"], TIPOS_VIA.grandes, 10, TIPOS_VIA.principales, 7, 4]],
+          "line-opacity": 0.9,
+        } }, "municipios-linea");
+      const CAPAS_BASE = ["tunel", "senderos", "servicio", "calles", "carreteras-secundarias", "carreteras-principales", "autopistas", "ferrocarril", "ferrocarril-traviesas"];
+
+      const sel = panel.querySelector("#calles-ciudad");
+      const ciudades = await (await fetch("data/calles/index.json")).json().catch(() => []);
+      for (const c of ciudades) {
+        const o = document.createElement("option");
+        o.value = c.archivo;
+        o.textContent = `${c.nombre} · ${(c.kb / 1024).toFixed(1)} MB`;
+        sel.appendChild(o);
+      }
+      const cargarCalles = async (archivo) => {
+        const links = panel.querySelector("#calles-links");
+        if (!archivo) {
+          map.getSource("calles-geojson").setData({ type: "FeatureCollection", features: [] });
+          links.hidden = true;
+          return;
+        }
+        const c = ciudades.find((x) => x.archivo === archivo);
+        if (!c) return;
+        const t = TXT[UI_LANG[lang]];
+        links.hidden = false;
+        panel.querySelector("#calles-info").textContent = "…";
+        panel.querySelector("#calles-descarga").href = "data/calles/" + archivo;
+        map.getSource("calles-geojson").setData(abs("data/calles/" + archivo));
+        panel.querySelector("#calles-info").textContent = `${c.vias.toLocaleString(UI_LANG[lang])} ${t.vias}`;
+        const [cw, cs, ce, cn] = c.bbox;
+        map.fitBounds([[cw, cs], [ce, cn]], { padding: 40, duration: 1400, pitch: map.getPitch(), bearing: map.getBearing() });
+      };
+      sel.addEventListener("change", () => cargarCalles(sel.value));
+      const ponerModo = (m) => {
+        map._modoCalles = m;
+        map.setPaintProperty("calles-geojson", "line-color", colorCalles(m, tema));
+        panel.querySelectorAll("#calles-modo button").forEach((b) => b.setAttribute("aria-pressed", b.dataset.modo === m));
+      };
+      panel.querySelectorAll("#calles-modo button").forEach((b) => b.addEventListener("click", () => ponerModo(b.dataset.modo)));
+      panel.querySelector("#calles-base").addEventListener("change", (ev) => {
+        for (const id of CAPAS_BASE) if (map.getLayer(id)) map.setLayoutProperty(id, "visibility", ev.target.checked ? "none" : "visible");
+      });
+      const params = new URLSearchParams(location.search);
+      ponerModo(["tipo", "arcoiris", "uno"].includes(params.get("modo")) ? params.get("modo") : "tipo");
+      const pedida = params.get("calles");
+      if (pedida) {
+        const c = ciudades.find((x) => x.archivo === pedida + ".geojson");
+        if (c) { sel.value = c.archivo; cargarCalles(c.archivo); }
+      }
+      if (params.get("base") === "0") panel.querySelector("#calles-base").click();
+
+      map.on("click", "calles-geojson", (ev) => {
+        const p = ev.features[0].properties;
+        const nom = (lang === "eu" ? p.izena_eu : lang === "es" ? p.nombre_es : null) || p.nombre || "—";
+        new maplibregl.Popup({ closeButton: false, maxWidth: "260px" })
+          .setLngLat(ev.lngLat)
+          .setHTML(`<b>${nom}</b><br><small>${p.highway}${p.ref ? " · " + p.ref : ""}</small><br><small>OSM way ${p.id}</small>`)
+          .addTo(map);
+      });
+      map.on("mouseenter", "calles-geojson", () => { map.getCanvas().style.cursor = "pointer"; });
+      map.on("mouseleave", "calles-geojson", () => { map.getCanvas().style.cursor = ""; });
     });
 
     return map;

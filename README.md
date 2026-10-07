@@ -19,6 +19,10 @@ A dark, elegant digital map of the Basque Country (Euskadi) showing **every stre
 
 ![3D Euskadi](img/3d-euskadi.png)
 
+| Street GeoJSON · Bilbao (rainbow) | Street GeoJSON · Donostia (by type) |
+|---|---|
+| ![Streets Bilbao](img/calles-bilbao.png) | ![Streets Donostia](img/calles-donostia.png) |
+
 ---
 
 ## English
@@ -38,7 +42,8 @@ A dark, elegant digital map of the Basque Country (Euskadi) showing **every stre
   - Your settings are saved in your browser
 - Municipality **search**. Click a municipality to see its province, population and INE code.
 - Label language: **EU**, **ES**, **EN** or **EU / ES** (the official, often bilingual, name).
-- Shareable URLs: the position is stored in the `#hash`. `?tema=claro` picks a theme and `?lang=en` picks a language.
+- **Streets as GeoJSON**: pick a municipality in the panel to load every street, road and path as GeoJSON. You can colour them by type, in rainbow colours (one per street) or in a single colour, hide the base map streets, click a street to see its name, and download the file.
+- Shareable URLs: the position is stored in the `#hash`. `?tema=claro` picks a theme and `?lang=en` picks a language. `?calles=bilbao&modo=arcoiris&base=0` opens Bilbao's streets in rainbow colours without the base map streets.
 
 ### GeoJSON files
 
@@ -62,6 +67,26 @@ Municipality properties:
 
 `tipo` is either `municipio` or `partzuergoa` (communal land that belongs to no municipality, such as Enirio-Aralar).
 Coordinates are in WGS84 (EPSG:4326).
+
+#### Streets per municipality — `data/calles/`
+
+One GeoJSON file per municipality with **every way tagged `highway`** in OpenStreetMap (streets, roads, footpaths, paths, steps…), clipped to the municipal boundary. All municipalities with 20,000 or more inhabitants are included; [`data/calles/index.json`](data/calles/index.json) lists them with their size and bounding box.
+
+```json
+{ "type": "Feature",
+  "properties": { "id": 11505371, "highway": "primary", "nombre": "Salbe zubia / Puente La Salve",
+                  "izena_eu": "Salve zubia", "nombre_es": "Puente La Salve", "oneway": "yes", "puente": "yes" },
+  "geometry": { "type": "LineString", "coordinates": [[-2.93134, 43.27007], …] } }
+```
+
+```js
+const r = await fetch("https://cdn.jsdelivr.net/gh/ortzigaraio/Euskadi-Mapa-digital-@main/data/calles/bilbao.geojson");
+const calles = await r.json();
+```
+
+To add any other municipality: `python3 scripts/build_calles.py Zumaia Bermeo` (by name or OSM id).
+
+Idea inspired by [amoraschi/spain-cities-geojson](https://github.com/amoraschi/spain-cities-geojson). These files are generated independently from OpenStreetMap: they also cover Donostia and 17 more Basque municipalities, include the street names in Basque and Spanish, and take up about half the size.
 
 ### Use it in your project
 
@@ -103,7 +128,8 @@ Start `python3 -m http.server 8000` in the repo folder and open http://localhost
 
 ```bash
 pip install shapely
-python3 scripts/build_data.py      # GeoJSON from OpenStreetMap
+python3 scripts/build_data.py      # boundaries, municipalities and mask from OpenStreetMap
+python3 scripts/build_calles.py    # streets of municipalities with 20,000+ inhabitants
 node scripts/capturas.mjs          # preview images in img/ (needs Playwright and a local server)
 ```
 
@@ -117,7 +143,7 @@ index.html            2D viewer
 js/mapa.js            shared viewer code (themes, colours, mask, search, 3D)
 css/mapa.css          viewer styles
 estilo/               MapLibre style
-data/                 GeoJSON
+data/                 GeoJSON (data/calles/: streets per municipality)
 scripts/              data and screenshot generators
 img/                  previews
 ```
@@ -153,7 +179,8 @@ Euskadiko mapa digital iluna eta dotorea, OpenStreetMap-eko **kale guztiekin**, 
   - Zure ezarpenak nabigatzailean gordetzen dira
 - Udalerri-**bilatzailea**. Udalerri batean klik eginez gero, lurraldea, biztanleak eta INE kodea ikusten dira.
 - Izenen hizkuntza: **EU**, **ES**, **EN** edo **EU / ES** (izen ofiziala, askotan elebiduna).
-- URLak partekatzeko modukoak dira: kokapena `#hash`-ean gordetzen da. `?tema=claro` gaia aukeratzen du eta `?lang=eu` hizkuntza.
+- **Kaleak GeoJSON gisa**: panelean udalerri bat aukeratuz gero, bere kale, errepide eta bide guztiak GeoJSON gisa kargatzen dira. Motaren arabera, ortzadarraren koloreekin (kale bakoitza kolore batekin) edo kolore bakarrarekin margotu daitezke; oinarri-mapako kaleak ezkuta daitezke, kale batean klik eginez gero bere izena ikusten da, eta fitxategia jaits daiteke.
+- URLak partekatzeko modukoak dira: kokapena `#hash`-ean gordetzen da. `?tema=claro` gaia aukeratzen du eta `?lang=eu` hizkuntza. `?calles=bilbao&modo=arcoiris&base=0` Bilboko kaleak irekitzen ditu ortzadarraren koloreekin.
 
 ### GeoJSON fitxategiak
 
@@ -166,6 +193,10 @@ GitHub-ek edozein `.geojson` mapa interaktibo gisa erakusten du, beraz zuzenean 
 | [`data/municipios.geojson`](data/municipios.geojson) | 252 udalerriak eta 9 partzuergo (INE kodea, biztanleak, izena euskaraz eta gaztelaniaz) |
 | [`data/mascara.geojson`](data/mascara.geojson) | Euskadikoa **ez** den inguruko lurra (itsasoa kanpo) |
 | [`estilo/euskadi-oscuro.json`](estilo/euskadi-oscuro.json) | MapLibre GL estilo iluna |
+| [`data/calles/`](data/calles/) | 20.000 biztanletik gorako udalerri bakoitzeko kale guztiak (OSM-ko `highway` bide guztiak, udal-mugara moztuta); zerrenda [`index.json`](data/calles/index.json)-en |
+
+Beste udalerri bat gehitzeko: `python3 scripts/build_calles.py Zumaia Bermeo`.
+Ideia [amoraschi/spain-cities-geojson](https://github.com/amoraschi/spain-cities-geojson) biltegitik dator; hemengo fitxategiak OpenStreetMap-etik zuzenean sortuak dira.
 
 `tipo` eremuak `municipio` edo `partzuergoa` balioa du. Partzuergoak inongo udalerritakoak ez diren lur komunalak dira, Enirio-Aralar adibidez.
 Koordenatuak WGS84 sisteman daude (EPSG:4326).
@@ -182,7 +213,8 @@ Abiarazi `python3 -m http.server 8000` biltegiaren karpetan eta ireki http://loc
 
 ```bash
 pip install shapely
-python3 scripts/build_data.py      # GeoJSON-ak OpenStreetMap-etik
+python3 scripts/build_data.py      # mugak, udalerriak eta maskara OpenStreetMap-etik
+python3 scripts/build_calles.py    # 20.000 biztanletik gorako udalerrien kaleak
 node scripts/capturas.mjs          # img/ karpetako irudiak
 ```
 

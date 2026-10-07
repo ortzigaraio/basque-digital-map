@@ -1,0 +1,322 @@
+[
+ {
+  "archivo": "arrasate.geojson",
+  "nombre": "Arrasate / Mondragón",
+  "izena_eu": "Arrasate",
+  "nombre_es": "Mondragón",
+  "osm_id": 342579,
+  "provincia": "Gipuzkoa",
+  "vias": 2245,
+  "kb": 814,
+  "bbox": [
+   -2.54807,
+   43.04455,
+   -2.44686,
+   43.09568
+  ]
+ },
+ {
+  "archivo": "barakaldo.geojson",
+  "nombre": "Barakaldo",
+  "izena_eu": "Barakaldo",
+  "nombre_es": "Baracaldo",
+  "osm_id": 340585,
+  "provincia": "Bizkaia",
+  "vias": 5094,
+  "kb": 1470,
+  "bbox": [
+   -3.04906,
+   43.23788,
+   -2.97057,
+   43.30524
+  ]
+ },
+ {
+  "archivo": "basauri.geojson",
+  "nombre": "Basauri",
+  "izena_eu": "Basauri",
+  "nombre_es": "Basauri",
+  "osm_id": 340591,
+  "provincia": "Bizkaia",
+  "vias": 1568,
+  "kb": 442,
+  "bbox": [
+   -2.91384,
+   43.21534,
+   -2.86679,
+   43.24578
+  ]
+ },
+ {
+  "archivo": "bilbao.geojson",
+  "nombre": "Bilbao",
+  "izena_eu": "Bilbao",
+  "nombre_es": "Bilbao",
+  "osm_id": 339549,
+  "provincia": "Bizkaia",
+  "vias": 14844,
+  "kb": 4056,
+  "bbox": [
+   -2.98598,
+   43.21372,
+   -2.88026,
+   43.29012
+  ]
+ },
+ {
+  "archivo": "donostia.geojson",
+  "nombre": "Donostia / San Sebastián",
+  "izena_eu": "Donostia",
+  "nombre_es": "San Sebastián",
+  "osm_id": 346465,
+  "provincia": "Gipuzkoa",
+  "vias": 12343,
+  "kb": 3722,
+  "bbox": [
+   -2.08681,
+   43.21784,
+   -1.88788,
+   43.33816
+  ]
+ },
+ {
+  "archivo": "durango.geojson",
+  "nombre": "Durango",
+  "izena_eu": "Durango",
+  "nombre_es": "Durango",
+  "osm_id": 339487,
+  "provincia": "Bizkaia",
+  "vias": 1591,
+  "kb": 427,
+  "bbox": [
+   -2.69653,
+   43.14681,
+   -2.61579,
+   43.17514
+  ]
+ },
+ {
+  "archivo": "eibar.geojson",
+  "nombre": "Eibar",
+  "izena_eu": "Eibar",
+  "nombre_es": "Éibar",
+  "osm_id": 342896,
+  "provincia": "Gipuzkoa",
+  "vias": 1815,
+  "kb": 629,
+  "bbox": [
+   -2.49966,
+   43.16409,
+   -2.43239,
+   43.22589
+  ]
+ },
+ {
+  "archivo": "erandio.geojson",
+  "nombre": "Erandio",
+  "izena_eu": "Erandio",
+  "nombre_es": "Erandio",
+  "osm_id": 347284,
+  "provincia": "Bizkaia",
+  "vias": 2036,
+  "kb": 601,
+  "bbox": [
+   -2.99244,
+   43.28549,
+   -2.9241,
+   43.34912
+  ]
+ },
+ {
+  "archivo": "errenteria.geojson",
+  "nombre": "Errenteria",
+  "izena_eu": "Errenteria",
+  "nombre_es": "Rentería",
+  "osm_id": 346459,
+  "provincia": "Gipuzkoa",
+  "vias": 3351,
+  "kb": 1045,
+  "bbox": [
+   -1.93201,
+   43.20682,
+   -1.8487,
+   43.32188
+  ]
+ },
+ {
+  "archivo": "galdakao.geojson",
+  "nombre": "Galdakao",
+  "izena_eu": "Galdakao",
+  "nombre_es": "Galdácano",
+  "osm_id": 347735,
+  "provincia": "Bizkaia",
+  "vias": 2418,
+  "kb": 766,
+  "bbox": [
+   -2.88445,
+   43.21244,
+   -2.7777,
+   43.26533
+  ]
+ },
+ {
+  "archivo": "getxo.geojson",
+  "nombre": "Getxo",
+  "izena_eu": "Getxo",
+  "nombre_es": "Guecho",
+  "osm_id": 344363,
+  "provincia": "Bizkaia",
+  "vias": 2793,
+  "kb": 749,
+  "bbox": [
+   -3.03963,
+   43.31987,
+   -2.96705,
+   43.38285
+  ]
+ },
+ {
+  "archivo": "hernani.geojson",
+  "nombre": "Hernani",
+  "izena_eu": "Hernani",
+  "nombre_es": "Hernani",
+  "osm_id": 346779,
+  "provincia": "Gipuzkoa",
+  "vias": 2494,
+  "kb": 939,
+  "bbox": [
+   -2.00567,
+   43.17256,
+   -1.89219,
+   43.28324
+  ]
+ },
+ {
+  "archivo": "irun.geojson",
+  "nombre": "Irun",
+  "izena_eu": "Irun",
+  "nombre_es": "Irún",
+  "osm_id": 346782,
+  "provincia": "Gipuzkoa",
+  "vias": 5109,
+  "kb": 1610,
+  "bbox": [
+   -1.85226,
+   43.28642,
+   -1.72927,
+   43.35329
+  ]
+ },
+ {
+  "archivo": "leioa.geojson",
+  "nombre": "Leioa",
+  "izena_eu": "Leioa",
+  "nombre_es": "Lejona",
+  "osm_id": 339945,
+  "provincia": "Bizkaia",
+  "vias": 2491,
+  "kb": 649,
+  "bbox": [
+   -3.01108,
+   43.31379,
+   -2.96056,
+   43.34356
+  ]
+ },
+ {
+  "archivo": "portugalete.geojson",
+  "nombre": "Portugalete",
+  "izena_eu": "Portugalete",
+  "nombre_es": "Portugalete",
+  "osm_id": 340243,
+  "provincia": "Bizkaia",
+  "vias": 3959,
+  "kb": 910,
+  "bbox": [
+   -3.03848,
+   43.30463,
+   -3.00641,
+   43.33232
+  ]
+ },
+ {
+  "archivo": "santurtzi.geojson",
+  "nombre": "Santurtzi",
+  "izena_eu": "Santurtzi",
+  "nombre_es": "Santurce",
+  "osm_id": 348916,
+  "provincia": "Bizkaia",
+  "vias": 2140,
+  "kb": 573,
+  "bbox": [
+   -3.07114,
+   43.31529,
+   -3.02287,
+   43.35538
+  ]
+ },
+ {
+  "archivo": "sestao.geojson",
+  "nombre": "Sestao",
+  "izena_eu": "Sestao",
+  "nombre_es": "Sestao",
+  "osm_id": 348929,
+  "provincia": "Bizkaia",
+  "vias": 1658,
+  "kb": 438,
+  "bbox": [
+   -3.01456,
+   43.29737,
+   -2.9784,
+   43.31839
+  ]
+ },
+ {
+  "archivo": "tolosa.geojson",
+  "nombre": "Tolosa",
+  "izena_eu": "Tolosa",
+  "nombre_es": "Tolosa",
+  "osm_id": 342239,
+  "provincia": "Gipuzkoa",
+  "vias": 1681,
+  "kb": 630,
+  "bbox": [
+   -2.16131,
+   43.0297,
+   -2.00925,
+   43.16312
+  ]
+ },
+ {
+  "archivo": "vitoria-gasteiz.geojson",
+  "nombre": "Vitoria-Gasteiz",
+  "izena_eu": "Gasteiz",
+  "nombre_es": "Vitoria",
+  "osm_id": 344337,
+  "provincia": "Araba / Álava",
+  "vias": 19768,
+  "kb": 5800,
+  "bbox": [
+   -2.85355,
+   42.76456,
+   -2.54376,
+   42.93671
+  ]
+ },
+ {
+  "archivo": "zarautz.geojson",
+  "nombre": "Zarautz",
+  "izena_eu": "Zarautz",
+  "nombre_es": "Zarauz",
+  "osm_id": 342241,
+  "provincia": "Gipuzkoa",
+  "vias": 2113,
+  "kb": 610,
+  "bbox": [
+   -2.20701,
+   43.24278,
+   -2.14054,
+   43.29738
+  ]
+ }
+]
