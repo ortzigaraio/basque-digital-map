@@ -1,6 +1,5 @@
 # Euskadi · Digital Map
 
-**[English](#english) · [Euskara](#euskara)**
 
 A dark, elegant digital map of the Basque Country (Euskadi) showing **every street** from OpenStreetMap, in **2D and 3D**. Land outside Euskadi is darkened and the sea is not. You can change the mask and the colours from the map itself.
 
