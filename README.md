@@ -17,7 +17,6 @@ A dark, elegant digital map of the Basque Country (Euskadi) showing **every stre
 | **Theme “Claro” · Vitoria-Gasteiz** | **Theme “Ikurriña” · 3D Donostia** |
 | ![Light theme](img/tema-claro.png) | ![Ikurriña theme](img/tema-ikurrina.png) |
 
-![3D Euskadi](img/3d-euskadi.png)
 
 | Street GeoJSON · Bilbao (rainbow) | Street GeoJSON · Donostia (by type) |
 |---|---|
@@ -25,7 +24,6 @@ A dark, elegant digital map of the Basque Country (Euskadi) showing **every stre
 
 ---
 
-## English
 
 ### Features
 
