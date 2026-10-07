@@ -5,9 +5,15 @@ Salida: data/calles/<municipio>.geojson (LineString por vía de OSM) y
 data/calles/index.json con la lista de municipios disponibles.
 
 Uso:
-  pip install shapely
-  python3 scripts/build_calles.py                 # municipios de 20.000 habitantes o más
-  python3 scripts/build_calles.py Zumaia Bermeo   # municipios concretos (nombre o osm_id)
+  pip install shapely osmium
+  python3 scripts/build_calles.py                   # municipios de 500 habitantes o más
+  python3 scripts/build_calles.py --min 0           # todos los municipios
+  python3 scripts/build_calles.py Zumaia Bermeo     # municipios concretos (nombre o osm_id)
+  python3 scripts/build_calles.py --overpass Zumaia # usar Overpass en vez del extracto
+
+Por defecto lee el extracto de OpenStreetMap de Euskadi (openstreetmap.fr,
+~80 MB, se descarga una vez a scripts/.cache). Con --overpass consulta la API
+de Overpass municipio a municipio (más lento).
 
 Requiere data/municipios.geojson (scripts/build_data.py).
 Datos © colaboradores de OpenStreetMap, licencia ODbL.
@@ -22,6 +28,7 @@ import unicodedata
 import urllib.parse
 import urllib.request
 
+from shapely import STRtree
 from shapely.geometry import LineString, MultiLineString, mapping, shape
 from shapely.prepared import prep
 
@@ -35,7 +42,10 @@ OVERPASS = [
     "https://maps.mail.ru/osm/tools/overpass/api/interpreter",
     "https://overpass.kumi.systems/api/interpreter",
 ]
-POBLACION_MINIMA = 20000
+PBF_URL = "https://download.openstreetmap.fr/extracts/europe/spain/euskadi.osm.pbf"
+POBLACION_MINIMA = 500
+CAMPOS = (("name", "nombre"), ("name:eu", "izena_eu"), ("name:es", "nombre_es"), ("ref", "ref"),
+          ("oneway", "oneway"), ("bridge", "puente"), ("tunnel", "tunel"), ("surface", "superficie"))
 # Tipos de vía que no son calles ni caminos.
 EXCLUIR = {"proposed", "construction", "platform", "bus_stop", "elevator", "raceway", "abandoned", "razed", "services", "rest_area"}
 TESELA = 0.12  # grados; las consultas grandes se trocean
@@ -86,21 +96,74 @@ def redondear(coords):
     return [[round(x, 5), round(y, 5)] for x, y in coords]
 
 
-def construir(muni):
-    p = muni["properties"]
+def es_via(tags):
+    return "highway" in tags and tags.get("area") != "yes" and tags["highway"] not in EXCLUIR
+
+
+class FuenteOverpass:
+    """Vías de un municipio consultando Overpass por teselas."""
+
+    def vias(self, muni, geom):
+        vistos = {}
+        for k, bbox in enumerate(teselas(geom)):
+            for el in overpass(bbox, f"{muni['properties']['osm_id']}_{k}.json")["elements"]:
+                if el["type"] == "way" and el["id"] not in vistos and len(el.get("geometry", [])) > 1:
+                    t = el.get("tags", {})
+                    if es_via(t):
+                        vistos[el["id"]] = (el["id"], t, LineString([(pt["lon"], pt["lat"]) for pt in el["geometry"]]))
+        return vistos.values()
+
+
+class FuentePBF:
+    """Todas las vías del extracto .osm.pbf, indexadas espacialmente."""
+
+    def __init__(self, path):
+        import osmium
+
+        datos = []
+
+        class Lector(osmium.SimpleHandler):
+            def way(self, w):
+                if "highway" not in w.tags:
+                    return
+                t = {k: v for k, v in w.tags}
+                if not es_via(t):
+                    return
+                try:
+                    coords = [(n.lon, n.lat) for n in w.nodes]
+                except osmium.InvalidLocationError:
+                    coords = [(n.lon, n.lat) for n in w.nodes if n.location.valid()]
+                if len(coords) > 1:
+                    datos.append((w.id, {k: t[k] for k, _ in CAMPOS + (("highway", ""),) if k in t}, LineString(coords)))
+
+        print(f"Leyendo {path}…", flush=True)
+        Lector().apply_file(path, locations=True)
+        print(f"  {len(datos)} vías", flush=True)
+        self.datos = datos
+        self.arbol = STRtree([d[2] for d in datos])
+
+    def vias(self, muni, geom):
+        return [self.datos[i] for i in self.arbol.query(geom, predicate="intersects")]
+
+
+def descargar_pbf():
+    path = os.path.join(ROOT, "scripts", ".cache", "euskadi.osm.pbf")
+    if not os.path.exists(path):
+        print(f"Descargando {PBF_URL}…", flush=True)
+        os.makedirs(os.path.dirname(path), exist_ok=True)
+        req = urllib.request.Request(PBF_URL, headers={"User-Agent": UA})
+        with urllib.request.urlopen(req, timeout=600) as r, open(path + ".part", "wb") as f:
+            while bloque := r.read(1 << 20):
+                f.write(bloque)
+        os.replace(path + ".part", path)
+    return path
+
+
+def construir(muni, fuente):
     geom = shape(muni["geometry"])
     dentro = prep(geom)
-    vistos = {}
-    for k, bbox in enumerate(teselas(geom)):
-        for el in overpass(bbox, f"{p['osm_id']}_{k}.json")["elements"]:
-            if el["type"] == "way" and el["id"] not in vistos and len(el.get("geometry", [])) > 1:
-                vistos[el["id"]] = el
     feats = []
-    for el in vistos.values():
-        t = el.get("tags", {})
-        if t.get("highway") in EXCLUIR:
-            continue
-        linea = LineString([(pt["lon"], pt["lat"]) for pt in el["geometry"]])
+    for via_id, t, linea in fuente.vias(muni, geom):
         if not dentro.intersects(linea):
             continue
         if not dentro.contains(linea):
@@ -113,9 +176,8 @@ def construir(muni):
         g = partes[0] if len(partes) == 1 else MultiLineString(partes)
         m = mapping(g)
         coords = redondear(m["coordinates"]) if m["type"] == "LineString" else [redondear(c) for c in m["coordinates"]]
-        props = {"id": el["id"], "highway": t["highway"]}
-        for k_src, k_dst in (("name", "nombre"), ("name:eu", "izena_eu"), ("name:es", "nombre_es"), ("ref", "ref"),
-                             ("oneway", "oneway"), ("bridge", "puente"), ("tunnel", "tunel"), ("surface", "superficie")):
+        props = {"id": via_id, "highway": t["highway"]}
+        for k_src, k_dst in CAMPOS:
             if k_src in t:
                 props[k_dst] = t[k_src]
         feats.append({"type": "Feature", "properties": props, "geometry": {"type": m["type"], "coordinates": coords}})
@@ -126,7 +188,20 @@ def construir(muni):
 def main():
     with open(os.path.join(ROOT, "data", "municipios.geojson")) as f:
         munis = [m for m in json.load(f)["features"] if m["properties"]["tipo"] == "municipio"]
-    pedidos = sys.argv[1:]
+    args = sys.argv[1:]
+    usar_overpass = "--overpass" in args
+    minimo = POBLACION_MINIMA
+    if "--min" in args:
+        i = args.index("--min")
+        minimo = int(args[i + 1])
+        del args[i:i + 2]
+    if "--pbf" in args:
+        i = args.index("--pbf")
+        pbf = args[i + 1]
+        del args[i:i + 2]
+    else:
+        pbf = None
+    pedidos = [a for a in args if not a.startswith("--")]
     if pedidos:
         def coincide(m):
             p = m["properties"]
@@ -134,7 +209,9 @@ def main():
                                      (p["nombre_es"] or "").lower(), slug(p["nombre"] or "")} for x in pedidos)
         elegidos = [m for m in munis if coincide(m)]
     else:
-        elegidos = [m for m in munis if int(m["properties"].get("poblacion") or 0) >= POBLACION_MINIMA]
+        elegidos = [m for m in munis if int(m["properties"].get("poblacion") or 0) >= minimo]
+    print(f"{len(elegidos)} municipios", flush=True)
+    fuente = FuenteOverpass() if usar_overpass else FuentePBF(pbf or descargar_pbf())
 
     os.makedirs(OUT, exist_ok=True)
     idx_path = os.path.join(OUT, "index.json")
@@ -148,7 +225,7 @@ def main():
         nombre = slug(p["nombre"]) + ".geojson"
         print(f"{p['nombre']}…", flush=True)
         try:
-            feats = construir(m)
+            feats = construir(m, fuente)
         except RuntimeError as ex:
             print(f"  omitido: {ex}", flush=True)
             continue

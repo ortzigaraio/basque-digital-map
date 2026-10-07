@@ -70,7 +70,7 @@ Coordinates are in WGS84 (EPSG:4326).
 
 #### Streets per municipality — `data/calles/`
 
-One GeoJSON file per municipality with **every way tagged `highway`** in OpenStreetMap (streets, roads, footpaths, paths, steps…), clipped to the municipal boundary. All municipalities with 20,000 or more inhabitants are included; [`data/calles/index.json`](data/calles/index.json) lists them with their size and bounding box.
+One GeoJSON file per municipality with **every way tagged `highway`** in OpenStreetMap (streets, roads, footpaths, paths, steps…), clipped to the municipal boundary. The **191 municipalities with 500 or more inhabitants** are included (about 251,000 ways). [`data/calles/index.json`](data/calles/index.json) lists them with their province, size and bounding box. When you search for a municipality in the map, its streets load automatically.
 
 ```json
 { "type": "Feature",
@@ -84,9 +84,9 @@ const r = await fetch("https://cdn.jsdelivr.net/gh/ortzigaraio/Euskadi-Mapa-digi
 const calles = await r.json();
 ```
 
-To add any other municipality: `python3 scripts/build_calles.py Zumaia Bermeo` (by name or OSM id).
+To add the smaller municipalities too, run `python3 scripts/build_calles.py --min 0`. For specific ones, run `python3 scripts/build_calles.py Zumaia Bermeo` (by name or OSM id).
 
-Idea inspired by [amoraschi/spain-cities-geojson](https://github.com/amoraschi/spain-cities-geojson). These files are generated independently from OpenStreetMap: they also cover Donostia and 17 more Basque municipalities, include the street names in Basque and Spanish, and take up about half the size.
+Idea inspired by [amoraschi/spain-cities-geojson](https://github.com/amoraschi/spain-cities-geojson). These files are generated independently from OpenStreetMap: they also cover Donostia and every Basque municipality with 500+ inhabitants, include the street names in Basque and Spanish, and take up about half the size.
 
 ### Use it in your project
 
@@ -127,9 +127,9 @@ Start `python3 -m http.server 8000` in the repo folder and open http://localhost
 ### Rebuild the data
 
 ```bash
-pip install shapely
+pip install shapely osmium
 python3 scripts/build_data.py      # boundaries, municipalities and mask from OpenStreetMap
-python3 scripts/build_calles.py    # streets of municipalities with 20,000+ inhabitants
+python3 scripts/build_calles.py    # streets of municipalities with 500+ inhabitants (from the OSM extract)
 node scripts/capturas.mjs          # preview images in img/ (needs Playwright and a local server)
 ```
 
@@ -193,9 +193,9 @@ GitHub-ek edozein `.geojson` mapa interaktibo gisa erakusten du, beraz zuzenean 
 | [`data/municipios.geojson`](data/municipios.geojson) | 252 udalerriak eta 9 partzuergo (INE kodea, biztanleak, izena euskaraz eta gaztelaniaz) |
 | [`data/mascara.geojson`](data/mascara.geojson) | Euskadikoa **ez** den inguruko lurra (itsasoa kanpo) |
 | [`estilo/euskadi-oscuro.json`](estilo/euskadi-oscuro.json) | MapLibre GL estilo iluna |
-| [`data/calles/`](data/calles/) | 20.000 biztanletik gorako udalerri bakoitzeko kale guztiak (OSM-ko `highway` bide guztiak, udal-mugara moztuta); zerrenda [`index.json`](data/calles/index.json)-en |
+| [`data/calles/`](data/calles/) | 500 biztanletik gorako 191 udalerrien kale guztiak (OSM-ko `highway` bide guztiak, udal-mugara moztuta). Mapan udalerri bat bilatzean, bere kaleak automatikoki kargatzen dira; zerrenda [`index.json`](data/calles/index.json)-en |
 
-Beste udalerri bat gehitzeko: `python3 scripts/build_calles.py Zumaia Bermeo`.
+Udalerri txikiagoak ere gehitzeko: `python3 scripts/build_calles.py --min 0`. Udalerri jakin batzuk gehitzeko: `python3 scripts/build_calles.py Zumaia Bermeo`.
 Ideia [amoraschi/spain-cities-geojson](https://github.com/amoraschi/spain-cities-geojson) biltegitik dator; hemengo fitxategiak OpenStreetMap-etik zuzenean sortuak dira.
 
 `tipo` eremuak `municipio` edo `partzuergoa` balioa du. Partzuergoak inongo udalerritakoak ez diren lur komunalak dira, Enirio-Aralar adibidez.
@@ -212,9 +212,9 @@ Abiarazi `python3 -m http.server 8000` biltegiaren karpetan eta ireki http://loc
 ### Datuak berriro sortu
 
 ```bash
-pip install shapely
+pip install shapely osmium
 python3 scripts/build_data.py      # mugak, udalerriak eta maskara OpenStreetMap-etik
-python3 scripts/build_calles.py    # 20.000 biztanletik gorako udalerrien kaleak
+python3 scripts/build_calles.py    # 500 biztanletik gorako udalerrien kaleak
 node scripts/capturas.mjs          # img/ karpetako irudiak
 ```
 
