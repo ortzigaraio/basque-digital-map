@@ -75,14 +75,6 @@ fetch(BASE + "euskadi.geojson").then(r => r.json()).then(g =>
 
 Los `.geojson` se abren directamente en QGIS (arrastrar y soltar) o con `geopandas.read_file(...)`. Coordenadas en WGS84 (EPSG:4326).
 
-## Publicar la web en GitHub Pages
-
-1. **Settings → Pages**
-2. *Source*: **Deploy from a branch** · *Branch*: `main` · carpeta `/ (root)` → **Save**
-3. En un par de minutos estará en `https://<usuario>.github.io/Euskadi-Mapa-digital-/`
-
-Para probarlo en local: `python3 -m http.server 8000` y abrir http://localhost:8000.
-
 ## Regenerar los datos
 
 ```bash
